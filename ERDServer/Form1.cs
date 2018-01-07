@@ -21,10 +21,18 @@ namespace ERDServer
         {
             InitializeComponent();
 
+            listBox1.MouseDoubleClick += ListBox1_MouseDoubleClick;
+
             onlineBase = new ERDOnlineBase();
             onlineBase.NewClient += OnlineBase_NewClient;
             
             timer1.Start();
+        }
+
+        private void ListBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listBox1.SelectedIndex != -1)
+                onlineBase.RunRDP(new SimpleUser(onlineBase.users[listBox1.SelectedIndex]));
         }
 
         private void OnlineBase_NewClient(User client)

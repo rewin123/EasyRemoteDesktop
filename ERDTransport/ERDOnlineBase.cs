@@ -100,5 +100,10 @@ namespace ERDTransport
         {
             list_timer.Stop();
         }
+
+        public void RunRDP(SimpleUser user)
+        {
+            Process.Start("Cmd.exe", @"/C mstsc.exe  " + user.addres.Split(':')[0]);
+        }
     }
 }
