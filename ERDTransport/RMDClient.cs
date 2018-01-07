@@ -17,7 +17,7 @@ namespace ERDTransport
         TcpClient tcpClient;
         NetworkStream networkStream;
         BinaryFormatter formatter = new BinaryFormatter();
-        System.Timers.Timer timer = new System.Timers.Timer(20);
+        Timer timer = new Timer();
         public Bitmap screenImg;
 
         public int width = 300;
@@ -32,12 +32,13 @@ namespace ERDTransport
             
             if(SetupConnect(address,hash))
             {
-                timer.Elapsed += Timer_Elapsed;
+                timer.Interval = 20;
+                timer.Tick += Timer_Elapsed;
                 timer.Start();
             }
         }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, EventArgs e)
         {
             if(networkStream.DataAvailable)
             {
