@@ -33,15 +33,14 @@ namespace ERDTransport
         {
             listener = new TcpListener(port);
             listener.Start();
-
-            list_timer.AutoReset = false;
+            
             list_timer.Elapsed += Timer_Elapsed;
             list_timer.Start();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            #region Принимаем новых польщователей
+            #region Принимаем новых пользователей
             if (listener.Pending())
             {
                 TcpClient client = listener.AcceptTcpClient();
@@ -49,10 +48,10 @@ namespace ERDTransport
             }
             #endregion
 
-            #region Проверяем на активность польщователей
+            #region Проверяем на активность пользователей
             for(int i = 0;i < users.Count;i++)
             {
-                if(!users[i].tcpClient.Connected)
+                if(!users[i].tcpClient.Client.Connected)
                 {
                     Disconect(i, "");
                     i--;
@@ -61,8 +60,7 @@ namespace ERDTransport
             #endregion
 
             MessageRead();
-
-            list_timer.Start();
+            
         }
 
         void MessageRead()

@@ -38,6 +38,8 @@ namespace EasyRemoteDesktop
                 listBox1.Items.Add(users[i].ToString());
 
             listBox1.MouseDoubleClick += ListBox1_MouseDoubleClick;
+
+            timer1.Start();
         }
 
         private void ListBox1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -54,6 +56,14 @@ namespace EasyRemoteDesktop
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            users = clientBase.GetUsers();
+            listBox1.Items.Clear();
+            for (int i = 0; i < users.Length; i++)
+                listBox1.Items.Add(users[i].ToString());
         }
     }
 }
