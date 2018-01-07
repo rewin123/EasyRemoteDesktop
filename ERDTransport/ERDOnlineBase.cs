@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Timers;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+using System.Diagnostics;
 
 namespace ERDTransport
 {
