@@ -25,8 +25,16 @@ namespace ERDServer
 
             onlineBase = new ERDOnlineBase();
             onlineBase.NewClient += OnlineBase_NewClient;
+            onlineBase.UpdateClients += OnlineBase_UpdateClients;
             
             timer1.Start();
+        }
+
+        private void OnlineBase_UpdateClients()
+        {
+            listBox1.Items.Clear();
+            for (int i = 0; i < onlineBase.users.Count; i++)
+                listBox1.Items.Add(onlineBase.users[i].ToString());
         }
 
         private void ListBox1_MouseDoubleClick(object sender, MouseEventArgs e)
