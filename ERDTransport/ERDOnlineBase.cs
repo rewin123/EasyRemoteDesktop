@@ -9,6 +9,7 @@ using System.Timers;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace ERDTransport
 {
@@ -106,29 +107,21 @@ namespace ERDTransport
             }
         }
 
+        object lock_timer = new object();
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            #region Принимаем новых пользователей
-            if (listener.Pending())
+            lock (lock_timer)
             {
-                TcpClient client = listener.AcceptTcpClient();
-                unnamed_clients.Add(client);
-            }
-            #endregion
-
-            #region Проверяем на активность пользователей
-            for(int i = 0;i < users.Count;i++)
-            {
-                if(!users[i].tcpClient.Client.Connected)
+                #region Принимаем новых пользователей
+                if (listener.Pending())
                 {
-                    Disconect(i, "");
-                    i--;
+                    TcpClient client = listener.AcceptTcpClient();
+                    unnamed_clients.Add(client);
                 }
-            }
-            #endregion
+                #endregion
 
-            MessageRead();
-            
+                MessageRead();
+            }
         }
 
         void MessageRead()
@@ -149,9 +142,9 @@ namespace ERDTransport
 
             for(int i = 0;i < users.Count;i++)
             {
-                if(users[i].tcpClient.GetStream().DataAvailable)
+                if(users[i].stream.DataAvailable)
                 {
-                    CallData data = (CallData)formatter.Deserialize(users[i].tcpClient.GetStream());
+                    CallData data = JsonConvert.DeserializeObject<CallData>((string)formatter.Deserialize(users[i].tcpClient.GetStream()));
                     switch (data.methodName)
                     {
                         case "SendUsers":

@@ -11,19 +11,16 @@ namespace ERDTransport
     public class User
     {
         public string name = "Аноним";
-
-        [NonSerialized]
+        
         public TcpClient tcpClient;
-
-        public User()
-        {
-            
-        }
+        public NetworkStream stream;
+        
 
         public User(string name, ref TcpClient tcpClient)
         {
             this.name = name;
             this.tcpClient = tcpClient;
+            stream = this.tcpClient.GetStream();
         }
 
         public override string ToString()

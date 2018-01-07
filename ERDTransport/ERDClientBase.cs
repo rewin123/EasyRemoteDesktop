@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace ERDTransport
 {
@@ -87,7 +88,7 @@ namespace ERDTransport
                 methodName = "SendUsers"
             };
 
-            formatter.Serialize(networkStream, call);
+            formatter.Serialize(networkStream, JsonConvert.SerializeObject(call));
 
 
             string data = (string)formatter.Deserialize(networkStream);
