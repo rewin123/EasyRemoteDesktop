@@ -20,7 +20,7 @@ namespace ERDTransport
         public SimpleUser(User user)
         {
             name = user.name;
-            addres = user.tcpClient.Client.LocalEndPoint.ToString();
+            addres = user.tcpClient.Client.RemoteEndPoint.ToString();
         }
 
         public override string ToString()

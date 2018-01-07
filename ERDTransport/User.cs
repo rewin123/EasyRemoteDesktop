@@ -28,7 +28,7 @@ namespace ERDTransport
 
         public override string ToString()
         {
-            return name + "|" + tcpClient.Client.LocalEndPoint.ToString();
+            return name + "|" + tcpClient.Client.RemoteEndPoint.ToString();
         }
     }
 }
