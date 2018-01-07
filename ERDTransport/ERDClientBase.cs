@@ -57,7 +57,14 @@ namespace ERDTransport
         
         ~ERDClientBase()
         {
-            client.GetStream().Close();
+            try
+            {
+                client.GetStream().Close();
+            }
+            catch
+            {
+
+            }
         }
     }
 }

@@ -23,7 +23,9 @@ namespace ERDTransport
         Timer list_timer = new Timer(100);
 
         public delegate void NewClientEvent(User client);
+        public delegate void SomeAction();
         public event NewClientEvent NewClient;
+        public event SomeAction UpdateClients;
 
         BinaryFormatter formatter = new BinaryFormatter();
 
@@ -44,6 +46,17 @@ namespace ERDTransport
             {
                 TcpClient client = listener.AcceptTcpClient();
                 unnamed_clients.Add(client);
+            }
+            #endregion
+
+            #region Проверяем на активность польщователей
+            for(int i = 0;i < users.Count;i++)
+            {
+                if(!users[i].tcpClient.Connected)
+                {
+                    Disconect(i, "");
+                    i--;
+                }
             }
             #endregion
 
@@ -78,6 +91,9 @@ namespace ERDTransport
                         case "SendUsers":
                             SendUsers(i, data.data);
                             break;
+                        case "Disconect":
+                            Disconect(i, data.data);
+                            break;
                     }
                 }
             }
@@ -86,7 +102,6 @@ namespace ERDTransport
 
         void SendUsers(int id, string data)
         {
-
             SimpleUser[] s_users = new SimpleUser[users.Count];
             for (int i = 0; i < s_users.Length; i++)
                 s_users[i] = new SimpleUser(users[i]);
@@ -96,6 +111,12 @@ namespace ERDTransport
             formatter.Serialize(users[id].tcpClient.GetStream(), send);
         }
 
+        void Disconect(int id, string data)
+        {
+            users.RemoveAt(id);
+            UpdateClients.Invoke();
+        }
+
         ~ERDOnlineBase()
         {
             list_timer.Stop();
@@ -103,7 +124,7 @@ namespace ERDTransport
 
         public void RunRDP(SimpleUser user)
         {
-            Process.Start("Cmd.exe", @"/C mstsc.exe  " + user.addres.Split(':')[0]);
+            Process.Start("Cmd.exe", @"/C mstsc.exe  /v:" + user.addres.Split(':')[0]);
         }
     }
 }
