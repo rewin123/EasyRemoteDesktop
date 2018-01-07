@@ -176,7 +176,13 @@ namespace ERDTransport
 
             string send = Newtonsoft.Json.JsonConvert.SerializeObject(s_users);
 
-            formatter.Serialize(users[id].tcpClient.GetStream(), send);
+            CallData callData = new CallData
+            {
+                methodName = "GetUsers",
+                data = send
+            };
+
+            formatter.Serialize(users[id].tcpClient.GetStream(), JsonConvert.SerializeObject(callData));
         }
 
         void Disconect(int id, string data)
@@ -187,17 +193,29 @@ namespace ERDTransport
 
         void ActivateRMD(int id, string data)
         {
-            has_indexer++;
-            CallData clientCall = new CallData
+            int index = users.FindIndex((user) => user.name == data);
+            if (index != -1)
             {
-                methodName = "AllowRMDClient",
-                data = has_indexer.ToString()
-            };
-            formatter.Serialize(users[id].tcpClient.GetStream(), Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+                has_indexer++;
+                CallData clientCall = new CallData
+                {
+                    methodName = "AllowRMDClient",
+                    data = has_indexer.ToString()
+                };
+                formatter.Serialize(users[id].tcpClient.GetStream(), Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
 
-            clientCall.methodName = "StartRMDServer";
-            formatter.Serialize(users[users.FindIndex((user) => user.name == data)].tcpClient.GetStream(), 
-                Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+                clientCall.methodName = "StartRMDServer";
+                formatter.Serialize(users[users.FindIndex((user) => user.name == data)].tcpClient.GetStream(),
+                    Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+            }
+            else
+            {
+                CallData clientCall = new CallData
+                {
+                    methodName = "NotAllomRDM"
+                };
+                formatter.Serialize(users[id].tcpClient.GetStream(), Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+            }
         }
 
         ~ERDOnlineBase()

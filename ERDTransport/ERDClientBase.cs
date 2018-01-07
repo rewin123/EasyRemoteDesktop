@@ -24,6 +24,10 @@ namespace ERDTransport
         RMDServer server = null;
         string address = "";
 
+        public bool exterCall = true;
+
+        public SimpleUser[] users = new SimpleUser[0];
+
         public ERDClientBase(string address)
         {
             this.address = address;
@@ -49,8 +53,19 @@ namespace ERDTransport
                     case "AllowRMDClient":
                         AllowRMDClient(callData.data);
                         break;
+                    case "NotAllomRDM":
+                        NotAllomRDM(callData.data);
+                        break;
+                    case "GetUsers":
+                        GetUsers(callData.data);
+                        break;
                 }
             }
+        }
+
+        void GetUsers(string data)
+        {
+            users = JsonConvert.DeserializeObject<SimpleUser[]>(data);
         }
 
         void StartRMDServer(string data)
@@ -65,6 +80,11 @@ namespace ERDTransport
             int hash = int.Parse(data);
             RMDForm form = new RMDForm(address, hash);
             form.ShowDialog();
+        }
+
+        void NotAllomRDM(string data)
+        {
+            timer.Start();
         }
 
         void StopRMDServer()
@@ -82,7 +102,7 @@ namespace ERDTransport
             formatter.Serialize(networkStream, message);
         }
 
-        public SimpleUser[] GetUsers()
+        public void UpdateUsers()
         {
             CallData call = new CallData
             {
@@ -90,11 +110,7 @@ namespace ERDTransport
             };
 
             formatter.Serialize(networkStream, JsonConvert.SerializeObject(call));
-
-
-            string data = (string)formatter.Deserialize(networkStream);
-            SimpleUser[] users = Newtonsoft.Json.JsonConvert.DeserializeObject<SimpleUser[]>(data);
-            return users;
+            
         }
 
         public void RunRDP(SimpleUser user)

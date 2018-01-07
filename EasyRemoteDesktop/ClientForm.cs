@@ -17,7 +17,6 @@ namespace EasyRemoteDesktop
 {
     public partial class ClientForm : Form
     {
-        SimpleUser[] users;
         ERDClientBase clientBase;
         public ClientForm()
         {
@@ -29,13 +28,13 @@ namespace EasyRemoteDesktop
             if ((new Login(clientBase).ShowDialog()) != DialogResult.OK)
                 Close();
 
-            users = clientBase.GetUsers();
+            clientBase.UpdateUsers();
             InitializeComponent();
 
 
             listBox1.Items.Clear();
-            for (int i = 0; i < users.Length; i++)
-                listBox1.Items.Add(users[i].ToString());
+            for (int i = 0; i < clientBase.users.Length; i++)
+                listBox1.Items.Add(clientBase.users[i].ToString());
 
             listBox1.MouseDoubleClick += ListBox1_MouseDoubleClick;
 
@@ -45,7 +44,7 @@ namespace EasyRemoteDesktop
         private void ListBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (listBox1.SelectedIndex != -1)
-                clientBase.RunRDP(users[listBox1.SelectedIndex]);
+                clientBase.RunRDP(clientBase.users[listBox1.SelectedIndex]);
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -60,10 +59,10 @@ namespace EasyRemoteDesktop
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            users = clientBase.GetUsers();
+            clientBase.UpdateUsers();
             listBox1.Items.Clear();
-            for (int i = 0; i < users.Length; i++)
-                listBox1.Items.Add(users[i].ToString());
+            for (int i = 0; i < clientBase.users.Length; i++)
+                listBox1.Items.Add(clientBase.users[i].ToString());
         }
     }
 }
