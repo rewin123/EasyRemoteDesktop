@@ -22,7 +22,7 @@ namespace ERDTransport
         TcpListener listener;
         TcpListener rmd_listener;
         List<TcpClient> unnamed_clients = new List<TcpClient>();
-        Timer list_timer = new Timer(100);
+        System.Windows.Forms.Timer list_timer = new System.Windows.Forms.Timer();
         Timer rmd_timer = new Timer(10);
 
         int has_indexer = 1;
@@ -43,8 +43,9 @@ namespace ERDTransport
 
             rmd_listener = new TcpListener(RMDServer.port);
             rmd_listener.Start();
-            
-            list_timer.Elapsed += Timer_Elapsed;
+
+            list_timer.Interval = 100;
+            list_timer.Tick += Timer_Elapsed;
             list_timer.Start();
 
             rmd_timer.Elapsed += Rmd_timer_Elapsed;
@@ -53,6 +54,7 @@ namespace ERDTransport
             serversClient = new ERDClientBase("localhost");
             serversClient.Register("Server");
         }
+        
 
         object lock_rmd = new object();
         private void Rmd_timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -108,7 +110,8 @@ namespace ERDTransport
         }
 
         object lock_timer = new object();
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        [STAThread]
+        private void Timer_Elapsed(object sender, EventArgs e)
         {
             lock (lock_timer)
             {
@@ -136,6 +139,9 @@ namespace ERDTransport
                     TcpClient client = unnamed_clients[i];
                     users.Add(new User(reg_data.name, ref client));
                     NewClient.Invoke(users.Last());
+
+                    unnamed_clients.RemoveAt(i);
+                    i--;
                 }
             }
             #endregion

@@ -19,7 +19,7 @@ namespace ERDTransport
         TcpClient client;
         NetworkStream networkStream;
         BinaryFormatter formatter = new BinaryFormatter();
-        System.Timers.Timer timer = new System.Timers.Timer(100);
+        System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 
         RMDServer server = null;
         string address = "";
@@ -30,11 +30,12 @@ namespace ERDTransport
             client = new TcpClient(address, ERDOnlineBase.port);
             networkStream = client.GetStream();
 
-            timer.Elapsed += Timer_Elapsed;
+            timer.Interval = 100;
+            timer.Tick += Timer_Elapsed;
             timer.Start();
         }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, EventArgs e)
         {
             if (networkStream.DataAvailable)
             {
