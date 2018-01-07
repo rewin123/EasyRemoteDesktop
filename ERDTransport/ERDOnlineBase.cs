@@ -16,11 +16,15 @@ namespace ERDTransport
     {
         public static int port = 1999;
         public List<User> users = new List<User>();
-        
+        public List<RMDPair> pairs = new List<RMDPair>();
 
         TcpListener listener;
+        TcpListener rmd_listener;
         List<TcpClient> unnamed_clients = new List<TcpClient>();
         Timer list_timer = new Timer(100);
+        Timer rmd_timer = new Timer(10);
+
+        int has_indexer = 1;
 
         public delegate void NewClientEvent(User client);
         public delegate void SomeAction();
@@ -29,13 +33,77 @@ namespace ERDTransport
 
         BinaryFormatter formatter = new BinaryFormatter();
 
+        ERDClientBase serversClient;
+
         public ERDOnlineBase()
         {
             listener = new TcpListener(port);
             listener.Start();
+
+            rmd_listener = new TcpListener(RMDServer.port);
+            rmd_listener.Start();
             
             list_timer.Elapsed += Timer_Elapsed;
             list_timer.Start();
+
+            rmd_timer.Elapsed += Rmd_timer_Elapsed;
+            rmd_timer.Start();
+
+            serversClient = new ERDClientBase("localhost");
+            serversClient.Register("Server");
+        }
+
+        object lock_rmd = new object();
+        private void Rmd_timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            lock (lock_rmd)
+            {
+                if(rmd_listener.Pending())
+                {
+                    TcpClient client = rmd_listener.AcceptTcpClient();
+                    NetworkStream str = client.GetStream();
+                    int position = (int)formatter.Deserialize(str);
+                    int hash = (int)formatter.Deserialize(str);
+
+                    bool found = false;
+                    for(int i = 0;i < pairs.Count;i++)
+                    {
+                        if(pairs[i].hash == hash)
+                        {
+                            found = true;
+                            if (position == 0)
+                                pairs[i].client = client;
+                            else pairs[i].server = client;
+                            break;
+                        }
+                    }
+                    if(!found)
+                    {
+                        RMDPair pair = new RMDPair();
+                        if (position == 0)
+                            pair.client = client;
+                        else pair.server = client;
+                        pair.hash = hash;
+                        pairs.Add(pair);
+                    }
+                    formatter.Serialize(str, 1);//говорим, что запрос принят
+                }
+                for (int i = 0; i < pairs.Count; i++)
+                {
+                    RMDPair pair = pairs[i];
+                    if (pair.server != null && pair.client != null)
+                    {
+                        if (pair.server.GetStream().DataAvailable)
+                        {
+                            pair.server.GetStream().CopyTo(pair.client.GetStream());
+                        }
+                        if (pair.client.GetStream().DataAvailable)
+                        {
+                            pair.client.GetStream().CopyTo(pair.server.GetStream());
+                        }
+                    }
+                }
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -92,6 +160,9 @@ namespace ERDTransport
                         case "Disconect":
                             Disconect(i, data.data);
                             break;
+                        case "ActivateRMD":
+                            ActivateRMD(i, data.data);
+                            break;
                     }
                 }
             }
@@ -115,6 +186,21 @@ namespace ERDTransport
             UpdateClients.Invoke();
         }
 
+        void ActivateRMD(int id, string data)
+        {
+            has_indexer++;
+            CallData clientCall = new CallData
+            {
+                methodName = "AllowRMDClient",
+                data = has_indexer.ToString()
+            };
+            formatter.Serialize(users[id].tcpClient.GetStream(), Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+
+            clientCall.methodName = "StartRMDServer";
+            formatter.Serialize(users[users.FindIndex((user) => user.name == data)].tcpClient.GetStream(), 
+                Newtonsoft.Json.JsonConvert.SerializeObject(clientCall));
+        }
+
         ~ERDOnlineBase()
         {
             list_timer.Stop();
@@ -122,7 +208,7 @@ namespace ERDTransport
 
         public void RunRDP(SimpleUser user)
         {
-            Process.Start("Cmd.exe", @"/C mstsc.exe  /v:" + user.addres.Split(':')[0]);
+            //Process.Start("Cmd.exe", @"/C mstsc.exe  /v:" + user.addres.Split(':')[0]);
         }
     }
 }

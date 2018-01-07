@@ -18,11 +18,56 @@ namespace ERDTransport
         TcpClient client;
         NetworkStream networkStream;
         BinaryFormatter formatter = new BinaryFormatter();
+        System.Timers.Timer timer = new System.Timers.Timer(100);
+
+        RMDServer server = null;
+        string address = "";
 
         public ERDClientBase(string address)
         {
+            this.address = address;
             client = new TcpClient(address, ERDOnlineBase.port);
             networkStream = client.GetStream();
+
+            timer.Elapsed += Timer_Elapsed;
+            timer.Start();
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (networkStream.DataAvailable)
+            {
+                string data = (string)formatter.Deserialize(networkStream);
+                CallData callData = Newtonsoft.Json.JsonConvert.DeserializeObject<CallData>(data);
+                switch (callData.methodName)
+                {
+                    case "StartRMDServer":
+                        StartRMDServer(callData.data);
+                        break;
+                    case "AllowRMDClient":
+                        AllowRMDClient(callData.data);
+                        break;
+                }
+            }
+        }
+
+        void StartRMDServer(string data)
+        {
+            int hash = int.Parse(data);
+
+            server = new RMDServer(address, hash);
+        }
+
+        void AllowRMDClient(string data)
+        {
+            int hash = int.Parse(data);
+            RMDForm form = new RMDForm(address, hash);
+            form.ShowDialog();
+        }
+
+        void StopRMDServer()
+        {
+            server.Stop();
         }
 
         public void Register(string name)
@@ -52,7 +97,13 @@ namespace ERDTransport
 
         public void RunRDP(SimpleUser user)
         {
-            Process.Start("Cmd.exe", @"/C mstsc.exe  " + user.addres.Split(':')[0]);
+            CallData callData = new CallData
+            {
+                methodName = "ActivateRMD",
+                data = user.name
+            };
+            formatter.Serialize(networkStream, Newtonsoft.Json.JsonConvert.SerializeObject(callData));
+            //Process.Start("Cmd.exe", @"/C mstsc.exe  " + user.addres.Split(':')[0]);
         }
         
         ~ERDClientBase()
