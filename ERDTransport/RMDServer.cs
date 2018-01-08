@@ -50,7 +50,7 @@ namespace ERDTransport
 
         private void Timer_Elapsed(object sender, EventArgs e)
         {
-            if (networkStream.DataAvailable)
+            while (networkStream.DataAvailable)
             {
                 string data = (string)formatter.Deserialize(networkStream);
                 ClientCommand command = JsonConvert.DeserializeObject<ClientCommand>(data);
@@ -69,7 +69,19 @@ namespace ERDTransport
                 {
                     LeftMouseClick(command);
                 }
+
+                if(command.moveCursor)
+                {
+                    MoveCursor(command);
+                }
             }
+        }
+
+        void MoveCursor(ClientCommand command)
+        {
+            int X = (int)(command.mouseRelativeX * Screen.PrimaryScreen.Bounds.Width) + (int)Screen.PrimaryScreen.Bounds.X;
+            int Y = (int)(command.mouseRelativeY * Screen.PrimaryScreen.Bounds.Height) + (int)Screen.PrimaryScreen.Bounds.Y;
+            Cursor.Position = new Point(X, Y);
         }
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
