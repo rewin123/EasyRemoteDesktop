@@ -22,9 +22,11 @@ namespace ERDTransport
         Timer timer = new Timer();
         Bitmap screenImg;
         Graphics screenGr;
+        
 
         public RMDServer(string addressServer, int hash)
         {
+            
             screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format24bppRgb);
             screenGr = Graphics.FromImage(screenImg);
             tcpClient = new TcpClient(addressServer, port);

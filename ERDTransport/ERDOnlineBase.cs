@@ -56,7 +56,7 @@ namespace ERDTransport
         }
 
 
-        byte[] buffer = new byte[20];
+        byte[] buffer = new byte[8192];
         object lock_rmd = new object();
         private void Rmd_timer_Elapsed(object sender, EventArgs e)
         {

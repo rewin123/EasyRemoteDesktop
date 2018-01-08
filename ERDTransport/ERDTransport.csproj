@@ -41,6 +41,18 @@
     <Reference Include="Accord.Video.FFMPEG, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=x86">
       <HintPath>..\packages\Accord.Video.FFMPEG.3.8.0\lib\net46\Accord.Video.FFMPEG.dll</HintPath>
     </Reference>
+    <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Video, Version=2.2.5.0, Culture=neutral, PublicKeyToken=cbfb6e07d173c401, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.Video.2.2.5\lib\AForge.Video.dll</HintPath>
+    </Reference>
+    <Reference Include="MediaBase, Version=4.0.1433.0, Culture=neutral, PublicKeyToken=d264bf7150202654, processorArchitecture=x86">
+      <HintPath>..\packages\Streamcoders.MediaSuite.x86.4.0.1433.0\lib\net45\MediaBase.dll</HintPath>
+    </Reference>
+    <Reference Include="MediaSuite, Version=4.0.1433.0, Culture=neutral, PublicKeyToken=d264bf7150202654, processorArchitecture=x86">
+      <HintPath>..\packages\Streamcoders.MediaSuite.x86.4.0.1433.0\lib\net45\MediaSuite.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -79,6 +91,7 @@
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
