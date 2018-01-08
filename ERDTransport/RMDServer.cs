@@ -84,7 +84,14 @@ namespace ERDTransport
 
         void PressKey(ClientCommand command)
         {
-            SendKeys.Send("{" + command.key.ToString() + "}");
+            string data = command.key.ToString();
+            switch(command.key)
+            {
+                case Keys.Back:
+                    data = "BACKSPACE";
+                    break;
+            }
+            SendKeys.Send("{" + data.ToUpper() + "}");
         }
 
         void MoveCursor(ClientCommand command)
