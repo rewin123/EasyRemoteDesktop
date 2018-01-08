@@ -70,6 +70,18 @@ namespace ERDTransport
             }
         }
 
+        public void MouseMove(float relativeX, float relativeY)
+        {
+            ClientCommand clientCommand = new ClientCommand
+            {
+                moveCursor = true,
+                mouseRelativeX = relativeX,
+                mouseRelativeY = relativeY
+            };
+
+            formatter.Serialize(networkStream, JsonConvert.SerializeObject(clientCommand));
+        }
+
         public void MouseClick(bool isLeft, float relativeX, float relativeY)
         {
             ClientCommand clientCommand = new ClientCommand

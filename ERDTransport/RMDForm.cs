@@ -23,6 +23,12 @@ namespace ERDTransport
             client.height = pictureBox1.Height;
 
             pictureBox1.MouseClick += PictureBox1_MouseClick;
+            pictureBox1.MouseMove += PictureBox1_MouseMove;
+        }
+
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            client.MouseMove((float)e.X / pictureBox1.Width, (float)e.Y / pictureBox1.Height);
         }
 
         private void PictureBox1_MouseClick(object sender, MouseEventArgs e)
