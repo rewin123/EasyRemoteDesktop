@@ -70,6 +70,19 @@ namespace ERDTransport
             }
         }
 
+        public void MouseClick(bool isLeft, float relativeX, float relativeY)
+        {
+            ClientCommand clientCommand = new ClientCommand
+            {
+                leftMouseClick = isLeft,
+                rightMouseClick = !isLeft,
+                mouseRelativeX = relativeX,
+                mouseRelativeY = relativeY
+            };
+
+            formatter.Serialize(networkStream, JsonConvert.SerializeObject(clientCommand));
+        }
+
         bool SetupConnect(string address, int hash)
         {
             tcpClient = new TcpClient(address, RMDServer.port);

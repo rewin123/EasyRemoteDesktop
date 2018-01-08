@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace ERDTransport
 {
@@ -26,6 +27,7 @@ namespace ERDTransport
 
         public RMDServer(string addressServer, int hash)
         {
+           
             
             screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format24bppRgb);
             screenGr = Graphics.FromImage(screenImg);
@@ -57,7 +59,39 @@ namespace ERDTransport
                 {
                     SendFrame(command);
                 }
+
+                if(command.leftMouseClick)
+                {
+                    LeftMouseClick(command);
+                }
+
+                if (command.rightMouseClick)
+                {
+                    LeftMouseClick(command);
+                }
             }
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
+        private const int MOUSEEVENTF_RIGHTUP = 0x10;
+
+        void LeftMouseClick(ClientCommand command)
+        {
+            uint X = (uint)(command.mouseRelativeX * Screen.PrimaryScreen.Bounds.Width) + (uint)Screen.PrimaryScreen.Bounds.X;
+            uint Y = (uint)(command.mouseRelativeY * Screen.PrimaryScreen.Bounds.Height) + (uint)Screen.PrimaryScreen.Bounds.Y;
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0);
+        }
+
+        void RightMouseClick(ClientCommand command)
+        {
+            uint X = (uint)(command.mouseRelativeX * Screen.PrimaryScreen.Bounds.Width) + (uint)Screen.PrimaryScreen.Bounds.X;
+            uint Y = (uint)(command.mouseRelativeY * Screen.PrimaryScreen.Bounds.Height) + (uint)Screen.PrimaryScreen.Bounds.Y;
+            mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, X, Y, 0, 0);
         }
 
         void SendFrame(ClientCommand command)
