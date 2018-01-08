@@ -45,8 +45,9 @@ namespace ERDTransport
             {
                 int length = (int)formatter.Deserialize(networkStream);
                 byte[] buffer = new byte[length];
-                networkStream.Read(buffer, 0, length);
+                networkStream.Read(buffer, 0, (int)length);
                 MemoryStream mem = new MemoryStream(buffer);
+                mem.Position = 0;
                 screenImg = new Bitmap(mem);
                 NewFrame.Invoke(screenImg);
                 
