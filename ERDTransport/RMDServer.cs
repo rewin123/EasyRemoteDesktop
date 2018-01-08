@@ -74,7 +74,17 @@ namespace ERDTransport
                 {
                     MoveCursor(command);
                 }
+
+                if(command.pressKey)
+                {
+                    PressKey(command);
+                }
             }
+        }
+
+        void PressKey(ClientCommand command)
+        {
+            SendKeys.Send("{" + command.key.ToString() + "}");
         }
 
         void MoveCursor(ClientCommand command)

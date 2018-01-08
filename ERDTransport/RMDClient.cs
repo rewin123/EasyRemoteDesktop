@@ -106,5 +106,16 @@ namespace ERDTransport
             int result = (int)formatter.Deserialize(networkStream);
             return result == 1;
         }
+
+        public void PressKey(Keys key)
+        {
+            ClientCommand clientCommand = new ClientCommand
+            {
+                key = key,
+                pressKey = true
+            };
+
+            formatter.Serialize(networkStream, JsonConvert.SerializeObject(clientCommand));
+        }
     }
 }

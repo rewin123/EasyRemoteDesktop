@@ -24,6 +24,12 @@ namespace ERDTransport
 
             pictureBox1.MouseClick += PictureBox1_MouseClick;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
+            KeyDown += RMDForm_KeyDown;
+        }
+
+        private void RMDForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            client.PressKey(e.KeyCode);
         }
 
         private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
