@@ -44,7 +44,7 @@ namespace ERDTransport
             if (networkStream.DataAvailable)
             {
                 string data = (string)formatter.Deserialize(networkStream);
-                CallData callData = Newtonsoft.Json.JsonConvert.DeserializeObject<CallData>(data);
+                CallData callData = JsonConvert.DeserializeObject<CallData>(data);
                 switch (callData.methodName)
                 {
                     case "StartRMDServer":
@@ -120,7 +120,7 @@ namespace ERDTransport
                 methodName = "ActivateRMD",
                 data = user.name
             };
-            formatter.Serialize(networkStream, Newtonsoft.Json.JsonConvert.SerializeObject(callData));
+            formatter.Serialize(networkStream, JsonConvert.SerializeObject(callData));
             //Process.Start("Cmd.exe", @"/C mstsc.exe  " + user.addres.Split(':')[0]);
         }
         

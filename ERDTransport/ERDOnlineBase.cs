@@ -10,6 +10,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace ERDTransport
 {
@@ -23,7 +24,7 @@ namespace ERDTransport
         TcpListener rmd_listener;
         List<TcpClient> unnamed_clients = new List<TcpClient>();
         System.Windows.Forms.Timer list_timer = new System.Windows.Forms.Timer();
-        Timer rmd_timer = new Timer(10);
+        System.Windows.Forms.Timer rmd_timer = new System.Windows.Forms.Timer();
 
         int has_indexer = 1;
 
@@ -48,69 +49,81 @@ namespace ERDTransport
             list_timer.Tick += Timer_Elapsed;
             list_timer.Start();
 
-            rmd_timer.Elapsed += Rmd_timer_Elapsed;
+            rmd_timer.Interval = 20;
+            rmd_timer.Tick += Rmd_timer_Elapsed;
             rmd_timer.Start();
-
-            serversClient = new ERDClientBase("localhost");
-            serversClient.Register("Server");
+            
         }
-        
 
+
+        byte[] buffer = new byte[20];
         object lock_rmd = new object();
-        private void Rmd_timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void Rmd_timer_Elapsed(object sender, EventArgs e)
         {
-            lock (lock_rmd)
+            if (rmd_listener.Pending())
             {
-                if(rmd_listener.Pending())
-                {
-                    TcpClient client = rmd_listener.AcceptTcpClient();
-                    NetworkStream str = client.GetStream();
-                    int position = (int)formatter.Deserialize(str);
-                    int hash = (int)formatter.Deserialize(str);
+                TcpClient client = rmd_listener.AcceptTcpClient();
+                NetworkStream str = client.GetStream();
+                int position = (int)formatter.Deserialize(str);
+                int hash = (int)formatter.Deserialize(str);
 
-                    bool found = false;
-                    for(int i = 0;i < pairs.Count;i++)
-                    {
-                        if(pairs[i].hash == hash)
-                        {
-                            found = true;
-                            if (position == 0)
-                                pairs[i].client = client;
-                            else pairs[i].server = client;
-                            break;
-                        }
-                    }
-                    if(!found)
-                    {
-                        RMDPair pair = new RMDPair();
-                        if (position == 0)
-                            pair.client = client;
-                        else pair.server = client;
-                        pair.hash = hash;
-                        pairs.Add(pair);
-                    }
-                    formatter.Serialize(str, 1);//говорим, что запрос принят
-                }
+                bool found = false;
                 for (int i = 0; i < pairs.Count; i++)
                 {
-                    RMDPair pair = pairs[i];
-                    if (pair.server != null && pair.client != null)
+                    if (pairs[i].hash == hash)
                     {
-                        if (pair.server.GetStream().DataAvailable)
-                        {
-                            pair.server.GetStream().CopyTo(pair.client.GetStream());
-                        }
-                        if (pair.client.GetStream().DataAvailable)
-                        {
-                            pair.client.GetStream().CopyTo(pair.server.GetStream());
-                        }
+                        found = true;
+                        if (position == 0)
+                            pairs[i].client = client;
+                        else pairs[i].server = client;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    RMDPair pair = new RMDPair();
+                    if (position == 0)
+                        pair.client = client;
+                    else pair.server = client;
+                    pair.hash = hash;
+                    pairs.Add(pair);
+                }
+                formatter.Serialize(str, 1);//говорим, что запрос принят
+            }
+            for (int i = 0; i < pairs.Count; i++)
+            {
+                RMDPair pair = pairs[i];
+                if (pair.server != null && pair.client != null)
+                {
+                    var serverStream = pair.server.GetStream();
+                    var clientStream = pair.client.GetStream();
+                    while (pair.server.Available > buffer.Length)
+                    {
+                        serverStream.Read(buffer, 0, buffer.Length);
+                        clientStream.Write(buffer, 0, buffer.Length);
+                    }
+                    if(pair.server.Available > 0)
+                    {
+                        int count = pair.server.Available;
+                        serverStream.Read(buffer, 0, count);
+                        clientStream.Write(buffer, 0, count);
+                    }
+                    while (pair.client.Available > buffer.Length)
+                    {
+                        clientStream.Read(buffer, 0, buffer.Length);
+                        serverStream.Write(buffer, 0, buffer.Length);
+                    }
+                    if (pair.client.Available > 0)
+                    {
+                        int count = pair.client.Available;
+                        clientStream.Read(buffer, 0, count);
+                        serverStream.Write(buffer, 0, count);
                     }
                 }
             }
         }
 
         object lock_timer = new object();
-        [STAThread]
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             lock (lock_timer)
@@ -129,6 +142,30 @@ namespace ERDTransport
 
         void MessageRead()
         {
+            for (int i = 0; i < users.Count; i++)
+            {
+                if (users[i].stream.DataAvailable)
+                {
+                    object str = formatter.Deserialize(users[i].tcpClient.GetStream());
+                    CallData data;
+                    //if (str is CallData)
+                    //    data = (CallData)str;
+                     data = JsonConvert.DeserializeObject<CallData>((string)str);
+                    switch (data.methodName)
+                    {
+                        case "SendUsers":
+                            SendUsers(i, data.data);
+                            break;
+                        case "Disconect":
+                            Disconect(i, data.data);
+                            break;
+                        case "ActivateRMD":
+                            ActivateRMD(i, data.data);
+                            break;
+                    }
+                }
+            }
+
             #region Регистрируем новых пользователей
             for (int i = 0; i < unnamed_clients.Count; i++)
             {
@@ -146,25 +183,7 @@ namespace ERDTransport
             }
             #endregion
 
-            for(int i = 0;i < users.Count;i++)
-            {
-                if(users[i].stream.DataAvailable)
-                {
-                    CallData data = JsonConvert.DeserializeObject<CallData>((string)formatter.Deserialize(users[i].tcpClient.GetStream()));
-                    switch (data.methodName)
-                    {
-                        case "SendUsers":
-                            SendUsers(i, data.data);
-                            break;
-                        case "Disconect":
-                            Disconect(i, data.data);
-                            break;
-                        case "ActivateRMD":
-                            ActivateRMD(i, data.data);
-                            break;
-                    }
-                }
-            }
+            
         }
         
 

@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Newtonsoft.Json;
 using System.Windows.Forms;
+using System.IO;
 
 namespace ERDTransport
 {
@@ -18,7 +19,7 @@ namespace ERDTransport
         TcpClient tcpClient;
         NetworkStream networkStream;
         BinaryFormatter formatter = new BinaryFormatter();
-        System.Timers.Timer timer = new System.Timers.Timer(20);
+        Timer timer = new Timer();
         Bitmap screenImg;
         Graphics screenGr;
 
@@ -38,11 +39,12 @@ namespace ERDTransport
                 return;
             }
 
-            timer.Elapsed += Timer_Elapsed;
+            timer.Interval = 10;
+            timer.Tick += Timer_Elapsed;
             timer.Start();
         }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, EventArgs e)
         {
             if (networkStream.DataAvailable)
             {
@@ -60,7 +62,11 @@ namespace ERDTransport
         {
             screenGr.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size);
             Bitmap small_map = new Bitmap(command.needWidth, command.needHeight);
-            small_map.Save(networkStream, ImageFormat.Jpeg);
+            MemoryStream mem = new MemoryStream();
+            small_map.Save(mem, ImageFormat.Jpeg);
+            formatter.Serialize(networkStream, mem.Length);
+            mem.CopyTo(networkStream);
+            mem.Dispose();
         }
 
         public void Stop()

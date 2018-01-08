@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Newtonsoft.Json;
 using System.Windows.Forms;
+using System.IO;
 
 namespace ERDTransport
 {
@@ -42,8 +43,13 @@ namespace ERDTransport
         {
             if(networkStream.DataAvailable)
             {
-                screenImg = new Bitmap(networkStream);
+                int length = (int)formatter.Deserialize(networkStream);
+                byte[] buffer = new byte[length];
+                networkStream.Read(buffer, 0, length);
+                MemoryStream mem = new MemoryStream(buffer);
+                screenImg = new Bitmap(mem);
                 NewFrame.Invoke(screenImg);
+                
             }
             else
             {
