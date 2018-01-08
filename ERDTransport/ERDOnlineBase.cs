@@ -97,7 +97,7 @@ namespace ERDTransport
                 {
                     var serverStream = pair.server.GetStream();
                     var clientStream = pair.client.GetStream();
-                    while (pair.server.Available > buffer.Length)
+                    while (pair.server.Available >= buffer.Length)
                     {
                         serverStream.Read(buffer, 0, buffer.Length);
                         clientStream.Write(buffer, 0, buffer.Length);
@@ -105,10 +105,17 @@ namespace ERDTransport
                     if(pair.server.Available > 0)
                     {
                         int count = pair.server.Available;
-                        serverStream.Read(buffer, 0, count);
-                        clientStream.Write(buffer, 0, count);
+                        if (count < buffer.Length)
+                        {
+                            serverStream.Read(buffer, 0, count);
+                            clientStream.Write(buffer, 0, count);
+                        }
+                        else
+                        {
+                            ;
+                        }
                     }
-                    while (pair.client.Available > buffer.Length)
+                    while (pair.client.Available >= buffer.Length)
                     {
                         clientStream.Read(buffer, 0, buffer.Length);
                         serverStream.Write(buffer, 0, buffer.Length);
@@ -116,8 +123,15 @@ namespace ERDTransport
                     if (pair.client.Available > 0)
                     {
                         int count = pair.client.Available;
-                        clientStream.Read(buffer, 0, count);
-                        serverStream.Write(buffer, 0, count);
+                        if (count < buffer.Length)
+                        {
+                            clientStream.Read(buffer, 0, count);
+                            serverStream.Write(buffer, 0, count);
+                        }
+                        else
+                        {
+                            ;
+                        }
                     }
                 }
             }

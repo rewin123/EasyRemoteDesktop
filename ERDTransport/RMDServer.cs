@@ -61,12 +61,18 @@ namespace ERDTransport
         void SendFrame(ClientCommand command)
         {
             screenGr.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-            Bitmap small_map = new Bitmap(command.needWidth, command.needHeight);
+            Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
             MemoryStream mem = new MemoryStream();
             small_map.Save(mem, ImageFormat.Jpeg);
-            formatter.Serialize(networkStream, mem.Length);
-            mem.CopyTo(networkStream);
+            mem.Position = 0;
+            byte[] buffer = new byte[(int)mem.Length];
+            mem.Read(buffer, 0, (int)mem.Length);
+
+            formatter.Serialize(networkStream, buffer.Length);
+            networkStream.Write(buffer, 0, buffer.Length);
+
             mem.Dispose();
+            small_map.Dispose();
         }
 
         public void Stop()
