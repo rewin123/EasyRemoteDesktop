@@ -29,7 +29,7 @@ namespace ERDTransport
         {
            
             
-            screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format24bppRgb);
+            screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format16bppRgb565);
             screenGr = Graphics.FromImage(screenImg);
             tcpClient = new TcpClient(addressServer, port);
             networkStream = tcpClient.GetStream();
