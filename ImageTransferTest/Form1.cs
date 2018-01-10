@@ -60,7 +60,7 @@ namespace ImageTransferTest
             string timesheet = "";
             DateTime start = DateTime.Now;
             DateTime local_start = start;
-
+            
             screen_gr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
 
             timesheet += "Copy screen:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
@@ -109,7 +109,7 @@ namespace ImageTransferTest
 
     class MyEncoder
     {
-        int rect_size = 32;
+        int rect_size = 64;
         public int width = 0;
         public int height = 0;
         Bitmap map;
