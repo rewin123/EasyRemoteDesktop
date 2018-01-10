@@ -20,6 +20,7 @@ namespace ERDTransport
         BinaryFormatter formatter = new BinaryFormatter();
         Timer timer = new Timer();
         public Bitmap screenImg;
+        MyEncoder encoder;
 
         public int width = 300;
         public int height = 200;
@@ -27,8 +28,11 @@ namespace ERDTransport
         public delegate void FrameEvent(Bitmap map);
         public event FrameEvent NewFrame;
 
-        public RMDClient(string address, int hash)
+        public RMDClient(string address, int hash, int width, int height)
         {
+            this.width = width;
+            this.height = height;
+            encoder = new MyEncoder(width, height);
             screenImg = new Bitmap(1, 1);
             
             if(SetupConnect(address,hash))
@@ -54,7 +58,11 @@ namespace ERDTransport
                 //networkStream.Read(buffer, 0, (int)length);
                 MemoryStream mem = new MemoryStream(buffer);
                 mem.Position = 0;
-                screenImg = new Bitmap(mem);
+                MemoryStream decompressed = new MemoryStream();
+                ShortEncoder.Decode(mem, decompressed);
+                decompressed.Position = 0;
+                screenImg = encoder.LoadFromStr(decompressed);
+                //screenImg = new Bitmap(mem);
                 NewFrame.Invoke(screenImg);
                 
             }

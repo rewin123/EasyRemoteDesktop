@@ -1,112 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.IO;
-using System.IO.Compression;
-using System.Runtime.Serialization.Formatters.Binary;
 
-namespace ImageTransferTest
+namespace ERDTransport
 {
-    public partial class Form1 : Form
-    {
-        Bitmap screen_img;
-        Graphics screen_gr;
-        MyEncoder server;
-        MyEncoder reciever;
-        public Form1()
-        {
-            screen_img = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format16bppRgb565);
-            screen_gr = Graphics.FromImage(screen_img);
-            InitializeComponent();
-
-            server = new MyEncoder(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-            reciever = new MyEncoder(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-
-            timer1.Start();
-        }
-
-        long max_byterange = 0;
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            screen_gr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-
-            MemoryStream str = new MemoryStream();
-            server.WriteToStr(screen_img, str);
-            MemoryStream compressed = new MemoryStream();
-            ShortEncoder.Encode(str, compressed);
-
-            max_byterange = Math.Max(max_byterange, compressed.Length);
-            Text = (max_byterange).ToString();
-
-            MemoryStream decompressed = new MemoryStream();
-            compressed.Position = 0;
-            ShortEncoder.Decode(compressed, decompressed);
-
-            decompressed.Position = 0;
-            str.Position = 0;
-            pictureBox1.Image = reciever.LoadFromStr(decompressed);
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            string timesheet = "";
-            DateTime start = DateTime.Now;
-            DateTime local_start = start;
-            
-            screen_gr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-
-            timesheet += "Copy screen:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
-            local_start = DateTime.Now;
-
-            MemoryStream str = new MemoryStream();
-            server.WriteToStr(screen_img, str);
-
-            timesheet += "\nWrite:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
-            local_start = DateTime.Now;
-
-            MemoryStream compressed = new MemoryStream();
-            str.Position = 0;
-            ShortEncoder.Encode(str, compressed);
-
-            timesheet += "\nCompress:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
-            local_start = DateTime.Now;
-
-            max_byterange = Math.Max(max_byterange, compressed.Length);
-            Text = (compressed.Length).ToString();
-
-            MemoryStream decompressed = new MemoryStream();
-            compressed.Position = 0;
-            ShortEncoder.Decode(compressed, decompressed);
-
-            timesheet += "\nDecompress:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
-            local_start = DateTime.Now;
-
-
-            decompressed.Position = 0;
-            str.Position = 0;
-            pictureBox1.Image = reciever.LoadFromStr(decompressed);
-
-            timesheet += "\nLoad:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
-            local_start = DateTime.Now;
-
-            double milliseconds = (DateTime.Now - start).TotalMilliseconds;
-            timesheet += "\nAll:" + milliseconds.ToString();
-            timesheet += "\nFPS:" + (1000 / milliseconds).ToString();
-            timesheet += "\nMbit\\s:" + (float)(compressed.Length * 1000 / milliseconds / 1024 / 1024 * 8);
-
-
-            label1.Text = timesheet;
-        }
-    }
-
     class MyEncoder
     {
         int rect_size = 64;
@@ -143,7 +46,7 @@ namespace ImageTransferTest
                 byte* b_point = (byte*)point;
                 short* block_img = (short*)block_data.Scan0.ToPointer();
                 Metablock block;
-                for(int i = 0;i < blocks.Count;i++)
+                for (int i = 0; i < blocks.Count; i++)
                 {
                     block = blocks[i];
                     if (!CheckBlock(i, next_point, point))
@@ -174,16 +77,16 @@ namespace ImageTransferTest
 
             next.UnlockBits(next_data);
         }
-        
+
         unsafe bool CheckBlock(int i, short* next_point, short* point)
         {
             Metablock block = blocks[i];
             int endX = block.x + block.width;
             int endY = block.y + block.height;
             int dist = 0;
-            for(int x = block.x;x < endX;x += 2)
+            for (int x = block.x; x < endX; x += 2)
             {
-                for(int y = block.y;y < endY;y += 2)
+                for (int y = block.y; y < endY; y += 2)
                 {
                     dist += Math.Abs(point[y * width + x] - next_point[y * width + x]);
                 }
@@ -222,9 +125,9 @@ namespace ImageTransferTest
                     }
                 }
 
-                for(int y = 0;y < height;y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for(int x = 0;x < width;x++)
+                    for (int x = 0; x < width; x++)
                     {
                         next_point[y * width + x] = point[y * width + x];
                     }
@@ -236,9 +139,9 @@ namespace ImageTransferTest
 
         void CreateMetaclocks()
         {
-            for(int x = 0;x < width;x += rect_size)
+            for (int x = 0; x < width; x += rect_size)
             {
-                for(int y = 0;y < height;y += rect_size)
+                for (int y = 0; y < height; y += rect_size)
                 {
                     Metablock block = new Metablock
                     {

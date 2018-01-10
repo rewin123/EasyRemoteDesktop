@@ -23,6 +23,7 @@ namespace ERDTransport
         Timer timer = new Timer();
         Bitmap screenImg;
         Graphics screenGr;
+        MyEncoder encoder;
         
 
         public RMDServer(string addressServer, int hash)
@@ -155,19 +156,35 @@ namespace ERDTransport
 
         void SendFrame(ClientCommand command)
         {
-            screenGr.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-            Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
-            MemoryStream mem = new MemoryStream();
-            small_map.Save(mem, ImageFormat.Jpeg);
-            mem.Position = 0;
-            byte[] buffer = new byte[(int)mem.Length];
-            mem.Read(buffer, 0, (int)mem.Length);
+            if(encoder == null)
+            {
+                encoder = new MyEncoder(command.needWidth, command.needHeight);
+            }
 
-            formatter.Serialize(networkStream, buffer.Length);
-            networkStream.Write(buffer, 0, buffer.Length);
+            screenGr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+            MemoryStream str = new MemoryStream();
+            encoder.WriteToStr(screenImg, str);
+            
 
-            mem.Dispose();
-            small_map.Dispose();
+            MemoryStream compressed = new MemoryStream();
+            str.Position = 0;
+            ShortEncoder.Encode(str, compressed);
+            compressed.Position = 0;
+            formatter.Serialize(networkStream, (int)compressed.Length);
+            compressed.CopyTo(networkStream);
+            //screenGr.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+            //Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
+            //MemoryStream mem = new MemoryStream();
+            //small_map.Save(mem, ImageFormat.Jpeg);
+            //mem.Position = 0;
+            //byte[] buffer = new byte[(int)mem.Length];
+            //mem.Read(buffer, 0, (int)mem.Length);
+
+            //formatter.Serialize(networkStream, buffer.Length);
+            //networkStream.Write(buffer, 0, buffer.Length);
+
+            //mem.Dispose();
+            //small_map.Dispose();
         }
 
         public void Stop()

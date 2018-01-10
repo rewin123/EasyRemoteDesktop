@@ -17,10 +17,8 @@ namespace ERDTransport
         public RMDForm(string address, int hash)
         {
             InitializeComponent();
-            client = new RMDClient(address, hash);
+            client = new RMDClient(address, hash, pictureBox1.Width, pictureBox1.Height);
             client.NewFrame += Client_NewFrame;
-            client.width = pictureBox1.Width;
-            client.height = pictureBox1.Height;
 
             pictureBox1.MouseClick += PictureBox1_MouseClick;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
