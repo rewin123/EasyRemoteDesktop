@@ -29,7 +29,14 @@ namespace ImageTransferTest
             server = new MyEncoder(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             reciever = new MyEncoder(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
 
+            this.SizeChanged += Form1_SizeChanged;
+
             timer1.Start();
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            
         }
 
         long max_byterange = 0;
@@ -105,6 +112,7 @@ namespace ImageTransferTest
 
             label1.Text = timesheet;
         }
+        
     }
 
     class MyEncoder

@@ -18,17 +18,34 @@ namespace ERDTransport
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
         RMDClient client;
+        int startWidth;
+        int startHeight;
+        int deltaX;
+        int deltaY;
         public RMDForm(string address, int hash)
         {
             InitializeComponent();
             client = new RMDClient(address, hash, pictureBox1.Width, pictureBox1.Height);
+            startWidth = pictureBox1.Width;
+            startHeight = pictureBox1.Height;
             client.NewFrame += Client_NewFrame;
 
             pictureBox1.MouseDown += PictureBox1_MouseDown;
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
             KeyDown += RMDForm_KeyDown;
+            SizeChanged += RMDForm_SizeChanged;
+
+            deltaX = Width - pictureBox1.Width;
+            deltaY = Height - pictureBox1.Height;
         }
+
+        private void RMDForm_SizeChanged(object sender, EventArgs e)
+        {
+            pictureBox1.Width = Width - deltaX;
+            pictureBox1.Height = Height - deltaY;
+        }
+
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             client.MouseClick(e.Button == MouseButtons.Left ? MOUSEEVENTF_LEFTUP : MOUSEEVENTF_RIGHTUP,

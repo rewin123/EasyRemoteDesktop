@@ -63,7 +63,7 @@ namespace ERDTransport
 
                 if(command.mouseEvent != 0)
                 {
-
+                    MouseEvent(command);
                 }
 
                 if(command.moveCursor)
