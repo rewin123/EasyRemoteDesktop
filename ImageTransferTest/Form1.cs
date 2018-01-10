@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.IO.Compression;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ImageTransferTest
@@ -30,7 +31,8 @@ namespace ImageTransferTest
 
             timer1.Start();
         }
-        
+
+        long max_byterange = 0;
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -38,22 +40,66 @@ namespace ImageTransferTest
 
             MemoryStream str = new MemoryStream();
             server.WriteToStr(screen_img, str);
+            MemoryStream compressed = new MemoryStream();
+            ShortEncoder.Encode(str, compressed);
 
-            Text = str.Length.ToString();
+            max_byterange = Math.Max(max_byterange, compressed.Length);
+            Text = (max_byterange).ToString();
+
+            MemoryStream decompressed = new MemoryStream();
+            compressed.Position = 0;
+            ShortEncoder.Decode(compressed, decompressed);
+
+            decompressed.Position = 0;
             str.Position = 0;
-            pictureBox1.Image = reciever.LoadFromStr(str);
+            pictureBox1.Image = reciever.LoadFromStr(decompressed);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            string timesheet = "";
+            DateTime start = DateTime.Now;
+            DateTime local_start = start;
+
             screen_gr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+
+            timesheet += "Copy screen:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
+            local_start = DateTime.Now;
 
             MemoryStream str = new MemoryStream();
             server.WriteToStr(screen_img, str);
 
-            Text = str.Length.ToString();
+            timesheet += "\nWrite:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
+            local_start = DateTime.Now;
+
+            MemoryStream compressed = new MemoryStream();
             str.Position = 0;
-            pictureBox1.Image = reciever.LoadFromStr(str);
+            ShortEncoder.Encode(str, compressed);
+
+            timesheet += "\nCompress:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
+            local_start = DateTime.Now;
+
+            max_byterange = Math.Max(max_byterange, compressed.Length);
+            Text = (compressed.Length).ToString();
+
+            MemoryStream decompressed = new MemoryStream();
+            compressed.Position = 0;
+            ShortEncoder.Decode(compressed, decompressed);
+
+            timesheet += "\nDecompress:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
+            local_start = DateTime.Now;
+
+
+            decompressed.Position = 0;
+            str.Position = 0;
+            pictureBox1.Image = reciever.LoadFromStr(decompressed);
+
+            timesheet += "\nLoad:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
+            local_start = DateTime.Now;
+
+            timesheet += "\nAll:" + (DateTime.Now - start).TotalMilliseconds.ToString();
+
+            label1.Text = timesheet;
         }
     }
 
