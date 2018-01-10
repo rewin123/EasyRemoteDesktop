@@ -90,12 +90,11 @@ namespace ERDTransport
             formatter.Serialize(networkStream, JsonConvert.SerializeObject(clientCommand));
         }
 
-        public void MouseClick(bool isLeft, float relativeX, float relativeY)
+        public void MouseClick(int mouseEvent, float relativeX, float relativeY)
         {
             ClientCommand clientCommand = new ClientCommand
             {
-                leftMouseClick = isLeft,
-                rightMouseClick = !isLeft,
+                mouseEvent = mouseEvent,
                 mouseRelativeX = relativeX,
                 mouseRelativeY = relativeY
             };

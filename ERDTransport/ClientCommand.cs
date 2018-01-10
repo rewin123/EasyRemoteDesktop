@@ -16,8 +16,7 @@ namespace ERDTransport
         public int needHeight = 0;
         public bool pressKey = false;
         public Keys key = Keys.Enter;
-        public bool leftMouseClick = false;
-        public bool rightMouseClick = false;
+        public int mouseEvent = 0;
         public bool moveCursor = false;
         public float mouseRelativeX = 0;
         public float mouseRelativeY = 0;

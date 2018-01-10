@@ -61,14 +61,9 @@ namespace ERDTransport
                     SendFrame(command);
                 }
 
-                if(command.leftMouseClick)
+                if(command.mouseEvent != 0)
                 {
-                    LeftMouseClick(command);
-                }
 
-                if (command.rightMouseClick)
-                {
-                    LeftMouseClick(command);
                 }
 
                 if(command.moveCursor)
@@ -140,18 +135,11 @@ namespace ERDTransport
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
 
-        void LeftMouseClick(ClientCommand command)
+        void MouseEvent(ClientCommand command)
         {
             uint X = (uint)(command.mouseRelativeX * Screen.PrimaryScreen.Bounds.Width) + (uint)Screen.PrimaryScreen.Bounds.X;
             uint Y = (uint)(command.mouseRelativeY * Screen.PrimaryScreen.Bounds.Height) + (uint)Screen.PrimaryScreen.Bounds.Y;
-            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0);
-        }
-
-        void RightMouseClick(ClientCommand command)
-        {
-            uint X = (uint)(command.mouseRelativeX * Screen.PrimaryScreen.Bounds.Width) + (uint)Screen.PrimaryScreen.Bounds.X;
-            uint Y = (uint)(command.mouseRelativeY * Screen.PrimaryScreen.Bounds.Height) + (uint)Screen.PrimaryScreen.Bounds.Y;
-            mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, X, Y, 0, 0);
+            mouse_event((uint)command.mouseEvent, X, Y, 0, 0);
         }
 
         void SendFrame(ClientCommand command)
@@ -162,8 +150,9 @@ namespace ERDTransport
             }
 
             screenGr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+            Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
             MemoryStream str = new MemoryStream();
-            encoder.WriteToStr(screenImg, str);
+            encoder.WriteToStr(small_map, str);
             
 
             MemoryStream compressed = new MemoryStream();
