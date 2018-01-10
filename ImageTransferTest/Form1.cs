@@ -97,7 +97,11 @@ namespace ImageTransferTest
             timesheet += "\nLoad:" + (DateTime.Now - local_start).TotalMilliseconds.ToString();
             local_start = DateTime.Now;
 
-            timesheet += "\nAll:" + (DateTime.Now - start).TotalMilliseconds.ToString();
+            double milliseconds = (DateTime.Now - start).TotalMilliseconds;
+            timesheet += "\nAll:" + milliseconds.ToString();
+            timesheet += "\nFPS:" + (1000 / milliseconds).ToString();
+            timesheet += "\nMbit\\s:" + (float)(compressed.Length * 1000 / milliseconds / 1024 / 1024 * 8);
+
 
             label1.Text = timesheet;
         }
@@ -105,7 +109,7 @@ namespace ImageTransferTest
 
     class MyEncoder
     {
-        int rect_size = 16;
+        int rect_size = 32;
         public int width = 0;
         public int height = 0;
         Bitmap map;
@@ -185,7 +189,7 @@ namespace ImageTransferTest
                 }
             }
 
-            return dist == 0;
+            return dist < 255;
         }
 
         public Bitmap LoadFromStr(Stream str)
@@ -194,6 +198,9 @@ namespace ImageTransferTest
             BitmapData next_data = next.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format16bppRgb565);
             unsafe
             {
+                //pos один расчет положения в циклах
+                int pos;
+
                 short* next_point = (short*)next_data.Scan0.ToPointer();
                 short* point = (short*)data.Scan0.ToPointer();
                 byte* b_point = (byte*)point;
@@ -208,8 +215,9 @@ namespace ImageTransferTest
                     {
                         for (int x = block.x; x < endX; x++)
                         {
-                            b_point[(y * width + x) * 2] = (byte)str.ReadByte();
-                            b_point[(y * width + x) * 2 + 1] = (byte)str.ReadByte();
+                            pos = (y * width + x) * 2;
+                            b_point[pos] = (byte)str.ReadByte();
+                            b_point[pos + 1] = (byte)str.ReadByte();
                         }
                     }
                 }
