@@ -8,6 +8,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace ERDTransport
 {
@@ -58,9 +60,23 @@ namespace ERDTransport
                 (float)e.X / pictureBox1.Width, (float)e.Y / pictureBox1.Height);
         }
 
+        InputSimulator simulator = new InputSimulator();
+
         private void RMDForm_KeyDown(object sender, KeyEventArgs e)
         {
-            client.PressKey(e.KeyCode);
+            var max = Enum.GetValues(typeof(VirtualKeyCode)).Cast<VirtualKeyCode>().Max();
+            var min = Enum.GetValues(typeof(VirtualKeyCode)).Cast<VirtualKeyCode>().Min();
+            for(var index = min; index < max;index++)
+            {
+                if(simulator.InputDeviceState.IsKeyDown(index))
+                {
+                    client.PressKey(index, false);
+                }
+                if (simulator.InputDeviceState.IsKeyUp(index))
+                {
+                    client.PressKey(index, true);
+                }
+            }
         }
 
         private void PictureBox1_MouseMove(object sender, MouseEventArgs e)

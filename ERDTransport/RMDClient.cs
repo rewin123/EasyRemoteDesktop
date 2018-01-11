@@ -114,12 +114,12 @@ namespace ERDTransport
             return result == 1;
         }
 
-        public void PressKey(Keys key)
+        public void PressKey(WindowsInput.Native.VirtualKeyCode key, bool keyUp)
         {
             ClientCommand clientCommand = new ClientCommand
             {
                 key = key,
-                pressKey = true
+                pressKey = (byte)(keyUp ? 2 : 1)
             };
 
             formatter.Serialize(networkStream, JsonConvert.SerializeObject(clientCommand));

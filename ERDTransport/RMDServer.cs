@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.IO;
 using System.Runtime.InteropServices;
+using WindowsInput.Native;
 
 namespace ERDTransport
 {
@@ -81,53 +82,21 @@ namespace ERDTransport
                     MoveCursor(command);
                 }
 
-                if(command.pressKey)
+                if(command.pressKey != 0)
                 {
                     PressKey(command);
                 }
             }
         }
 
+        WindowsInput.InputSimulator simulator = new WindowsInput.InputSimulator();
         void PressKey(ClientCommand command)
         {
-            string data = "{" + command.key.ToString() + "}";
-            switch(command.key)
+            if (command.pressKey == 1)
             {
-                case Keys.Back:
-                    data = "{BACKSPACE}";
-                    break;
-                case Keys.Menu:
-                    data = "%";
-                    break;
-                case Keys.Alt:
-                    data = "%";
-                    break;
-                case Keys.LShiftKey:
-                    data = "+";
-                    break;
-                case Keys.RShiftKey:
-                    data = "+";
-                    break;
-                case Keys.Shift:
-                    data = "+";
-                    break;
-                case Keys.ShiftKey:
-                    data = "+";
-                    break;
-                case Keys.Control:
-                    data = "^";
-                    break;
-                case Keys.ControlKey:
-                    data = "^";
-                    break;
-                case Keys.LControlKey:
-                    data = "^";
-                    break;
-                case Keys.RControlKey:
-                    data = "^";
-                    break;
+                simulator.Keyboard.KeyDown(command.key);
             }
-            SendKeys.Send(data.ToUpper());
+            else simulator.Keyboard.KeyUp(command.key);
         }
 
         void MoveCursor(ClientCommand command)
