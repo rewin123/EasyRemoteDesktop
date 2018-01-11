@@ -24,12 +24,11 @@ namespace ERDTransport
         Bitmap screenImg;
         Graphics screenGr;
         MyEncoder encoder;
-        
 
+        Task sendFrameTask = null;
+        
         public RMDServer(string addressServer, int hash)
         {
-           
-            
             screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format16bppRgb565);
             screenGr = Graphics.FromImage(screenImg);
             tcpClient = new TcpClient(addressServer, port);
@@ -58,7 +57,18 @@ namespace ERDTransport
 
                 if (command.needFrame)
                 {
-                    SendFrame(command);
+                    if (sendFrameTask == null)
+                    {
+                        sendFrameTask = new Task(() => SendFrame(command));
+                        sendFrameTask.Start();
+                    }
+
+                    if(sendFrameTask.Status != TaskStatus.Running)
+                    {
+                        sendFrameTask = new Task(() => SendFrame(command));
+                        sendFrameTask.Start();
+                    }
+                    //SendFrame(command);
                 }
 
                 if(command.mouseEvent != 0)
@@ -142,6 +152,8 @@ namespace ERDTransport
             mouse_event((uint)command.mouseEvent, X, Y, 0, 0);
         }
 
+        object tcpLock = new object();
+
         void SendFrame(ClientCommand command)
         {
             if(encoder == null)
@@ -159,21 +171,12 @@ namespace ERDTransport
             str.Position = 0;
             ShortEncoder.Encode(str, compressed);
             compressed.Position = 0;
-            formatter.Serialize(networkStream, (int)compressed.Length);
-            compressed.CopyTo(networkStream);
-            //screenGr.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-            //Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
-            //MemoryStream mem = new MemoryStream();
-            //small_map.Save(mem, ImageFormat.Jpeg);
-            //mem.Position = 0;
-            //byte[] buffer = new byte[(int)mem.Length];
-            //mem.Read(buffer, 0, (int)mem.Length);
 
-            //formatter.Serialize(networkStream, buffer.Length);
-            //networkStream.Write(buffer, 0, buffer.Length);
-
-            //mem.Dispose();
-            //small_map.Dispose();
+            lock (tcpLock)
+            {
+                formatter.Serialize(networkStream, (int)compressed.Length);
+                compressed.CopyTo(networkStream);
+            }
         }
 
         public void Stop()
