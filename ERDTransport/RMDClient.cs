@@ -10,6 +10,8 @@ using System.Drawing.Imaging;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.IO;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace ERDTransport
 {
@@ -114,7 +116,7 @@ namespace ERDTransport
             return result == 1;
         }
 
-        public void PressKey(WindowsInput.Native.VirtualKeyCode key, bool keyUp)
+        public void PressKey(VirtualKeyCode key, bool keyUp)
         {
             ClientCommand clientCommand = new ClientCommand
             {
