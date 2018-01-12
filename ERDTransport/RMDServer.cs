@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Runtime.InteropServices;
 using WindowsInput.Native;
+using AForge.Video;
 
 namespace ERDTransport
 {
@@ -22,16 +23,17 @@ namespace ERDTransport
         NetworkStream networkStream;
         BinaryFormatter formatter = new BinaryFormatter();
         Timer timer = new Timer();
-        Bitmap screenImg;
-        Graphics screenGr;
+        ScreenCaptureStream screenCapture;
         MyEncoder encoder;
 
         Task sendFrameTask = null;
         
         public RMDServer(string addressServer, int hash)
         {
-            screenImg = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format16bppRgb565);
-            screenGr = Graphics.FromImage(screenImg);
+            screenCapture = new ScreenCaptureStream(new Rectangle(Screen.PrimaryScreen.Bounds.Location, Screen.PrimaryScreen.Bounds.Size));
+            screenCapture.NewFrame += ScreenCapture_NewFrame;
+            screenCapture.Start();
+
             tcpClient = new TcpClient(addressServer, port);
             networkStream = tcpClient.GetStream();
 
@@ -49,6 +51,17 @@ namespace ERDTransport
             timer.Start();
         }
 
+        ClientCommand sendFrameCommand = null;
+
+        private void ScreenCapture_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        {
+            if(sendFrameCommand != null)
+            {
+                SendFrame(sendFrameCommand, eventArgs.Frame);
+                sendFrameCommand = null;
+            }
+        }
+
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             while (networkStream.DataAvailable)
@@ -58,18 +71,7 @@ namespace ERDTransport
 
                 if (command.needFrame)
                 {
-                    if (sendFrameTask == null)
-                    {
-                        sendFrameTask = new Task(() => SendFrame(command));
-                        sendFrameTask.Start();
-                    }
-
-                    if(sendFrameTask.Status != TaskStatus.Running)
-                    {
-                        sendFrameTask = new Task(() => SendFrame(command));
-                        sendFrameTask.Start();
-                    }
-                    //SendFrame(command);
+                    sendFrameCommand = command;
                 }
 
                 if(command.mouseEvent != 0)
@@ -123,14 +125,13 @@ namespace ERDTransport
 
         object tcpLock = new object();
 
-        void SendFrame(ClientCommand command)
+        void SendFrame(ClientCommand command, Bitmap screenImg)
         {
             if(encoder == null)
             {
                 encoder = new MyEncoder(command.needWidth, command.needHeight);
             }
-
-            screenGr.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+            
             Bitmap small_map = new Bitmap(screenImg, command.needWidth, command.needHeight);
             MemoryStream str = new MemoryStream();
             encoder.WriteToStr(small_map, str);
