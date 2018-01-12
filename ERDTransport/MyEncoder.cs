@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ERDTransport
 {
-    class MyEncoder
+    public class MyEncoder
     {
         int rect_size = 64;
         public int width = 0;
@@ -158,7 +158,7 @@ namespace ERDTransport
     }
 
     [Serializable]
-    class Metablock
+    public class Metablock
     {
         public int x = 0;
         public int y = 0;
@@ -167,7 +167,7 @@ namespace ERDTransport
     }
 
     [Serializable]
-    class Message
+    public class Message
     {
         public int blockIndex = 0;
         public int bytes = 0;
