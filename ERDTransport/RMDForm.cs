@@ -36,10 +36,28 @@ namespace ERDTransport
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             pictureBox1.MouseMove += PictureBox1_MouseMove;
             KeyDown += RMDForm_KeyDown;
+            pictureBox1.PreviewKeyDown += PictureBox1_PreviewKeyDown;
+            KeyUp += RMDForm_KeyUp;
+            pictureBox1.PreviewKeyDown += PictureBox1_PreviewKeyDown1;
             SizeChanged += RMDForm_SizeChanged;
 
             deltaX = Width - pictureBox1.Width;
             deltaY = Height - pictureBox1.Height;
+        }
+
+        private void PictureBox1_PreviewKeyDown1(object sender, PreviewKeyDownEventArgs e)
+        {
+            KeyTest();
+        }
+
+        private void RMDForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            KeyTest();
+        }
+
+        private void PictureBox1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            KeyTest();   
         }
 
         private void RMDForm_SizeChanged(object sender, EventArgs e)
@@ -64,11 +82,16 @@ namespace ERDTransport
 
         private void RMDForm_KeyDown(object sender, KeyEventArgs e)
         {
+            KeyTest();
+        }
+
+        void KeyTest()
+        {
             var max = Enum.GetValues(typeof(VirtualKeyCode)).Cast<VirtualKeyCode>().Max();
             var min = Enum.GetValues(typeof(VirtualKeyCode)).Cast<VirtualKeyCode>().Min();
-            for(var index = min; index < max;index++)
+            for (var index = min; index < max; index++)
             {
-                if(simulator.InputDeviceState.IsKeyDown(index))
+                if (simulator.InputDeviceState.IsKeyDown(index))
                 {
                     client.PressKey(index, false);
                 }
