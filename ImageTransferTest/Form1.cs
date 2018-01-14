@@ -21,22 +21,9 @@ namespace ImageTransferTest
     {
         ScreenCaptureStream screenCapture;
         DateTime lastFrame = DateTime.Now;
-        MemoryStream screenInput;
-        MemoryStream converterOutput;
-        MemoryStream resultJpegs;
-        FFMpegConverter converter = new FFMpegConverter();
-        ConvertSettings settings = new ConvertSettings();
-        ConvertLiveMediaTask task;
         public Form1()
         {
-            screenInput = new MemoryStream();
-            converterOutput = new MemoryStream();
-            resultJpegs = new MemoryStream();
-
-            settings.SetVideoFrameSize(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-
-            task = converter.ConvertLiveMedia(screenInput, Format.mjpeg, converterOutput, Format.mpeg, settings);
-            task.Start();
+            
 
             screenCapture = new ScreenCaptureStream(new Rectangle(0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height), 60);
             screenCapture.NewFrame += ScreenCapture_NewFrame;
@@ -72,8 +59,6 @@ namespace ImageTransferTest
             MemoryStream local = new MemoryStream();
             screen_img.Save(local, ImageFormat.Jpeg);
             local.Position = 0;
-            local.CopyTo(screenInput);
-            screenInput.Position -= local.Length;
         }
 
         private void timer1_Tick(object sender, EventArgs e)

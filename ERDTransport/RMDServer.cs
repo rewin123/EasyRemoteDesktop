@@ -30,7 +30,7 @@ namespace ERDTransport
         
         public RMDServer(string addressServer, int hash)
         {
-            screenCapture = new ScreenCaptureStream(new Rectangle(Screen.PrimaryScreen.Bounds.Location, Screen.PrimaryScreen.Bounds.Size));
+            screenCapture = new ScreenCaptureStream(new Rectangle(Screen.PrimaryScreen.Bounds.Location, Screen.PrimaryScreen.Bounds.Size),30);
             screenCapture.NewFrame += ScreenCapture_NewFrame;
             screenCapture.Start();
 
