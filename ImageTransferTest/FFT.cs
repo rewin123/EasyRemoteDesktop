@@ -26,6 +26,11 @@ namespace Fast_Fourier_Transform
         {            
              return ((float)Math.Atan(imag / real));
         }
+
+        public override string ToString()
+        {
+            return real + (imag >= 0 ? "+" : "") + imag + "i";
+        }
     }
     
     class FFT
@@ -424,7 +429,7 @@ namespace Fast_Fourier_Transform
             Return false if there are memory problems or
             the dimensions are not powers of 2
         */
-        public COMPLEX [,] FFT2D(COMPLEX[,] c, int nx, int ny, int dir)
+        public static COMPLEX [,] FFT2D(COMPLEX[,] c, int nx, int ny, int dir)
           {
             int i,j;
             int m;//Power of 2 for current number of points
@@ -505,7 +510,7 @@ namespace Fast_Fourier_Transform
                      ---
                      k=0
             */
-        private void FFT1D(int dir, int m, ref double[] x, ref double[] y )
+         public static void FFT1D(int dir, int m, ref double[] x, ref double[] y )
             {
                 long nn, i, i1, j, k, i2, l, l1, l2;
                 double c1, c2, tx, ty, t1, t2, u1, u2, z;
