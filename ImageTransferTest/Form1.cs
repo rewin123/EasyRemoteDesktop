@@ -21,7 +21,8 @@ namespace ImageTransferTest
     {
         ScreenCaptureStream screenCapture;
         DateTime lastFrame = DateTime.Now;
-        FCompress compress = new FCompress();
+        FCompress compress = new FCompress(16);
+        bool save = false;
         public Form1()
         {
             screenCapture = new ScreenCaptureStream(new Rectangle(0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height), 60);
@@ -48,7 +49,7 @@ namespace ImageTransferTest
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            
+            save = true;
         }
 
         void ImageLoad(Bitmap screen_img)
@@ -57,6 +58,12 @@ namespace ImageTransferTest
             str.Position = 0;
             var result = compress.Decompress(str);
             pictureBox1.Image = result;
+            Text = str.Length.ToString();
+            if(save)
+            {
+                save = false;
+                result.Save("result.png", ImageFormat.Png);
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)

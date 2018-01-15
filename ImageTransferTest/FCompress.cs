@@ -127,6 +127,7 @@ namespace ImageTransferTest
         {
             int width = (int)formatter.Deserialize(str);
             int height = (int)formatter.Deserialize(str);
+            BinaryReader reader = new BinaryReader(str);
             Bitmap map = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             BitmapData bitmapData = map.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
             var loc_arr = furieByte.raw;
@@ -144,14 +145,14 @@ namespace ImageTransferTest
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_cos[x, y] = (byte)str.ReadByte();
+                                loc_cos[x, y] = reader.ReadSByte();
                             }
                         }
                         for (int y = 0; y < size; y++)
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_sin[x, y] = (byte)str.ReadByte();
+                                loc_sin[x, y] = reader.ReadSByte();
                             }
                         }
                         furieByte.Decompress();
@@ -170,14 +171,14 @@ namespace ImageTransferTest
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_cos[x, y] = (byte)str.ReadByte();
+                                loc_cos[x, y] = reader.ReadSByte();
                             }
                         }
                         for (int y = 0; y < size; y++)
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_sin[x, y] = (byte)str.ReadByte();
+                                loc_sin[x, y] = reader.ReadSByte();
                             }
                         }
                         furieByte.Decompress();
@@ -196,14 +197,14 @@ namespace ImageTransferTest
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_cos[x, y] = (byte)str.ReadByte();
+                                loc_cos[x, y] = reader.ReadSByte();
                             }
                         }
                         for (int y = 0; y < size; y++)
                         {
                             for (int x = 0; x < size; x++)
                             {
-                                loc_sin[x, y] = (byte)str.ReadByte();
+                                loc_sin[x, y] = reader.ReadSByte();
                             }
                         }
                         furieByte.Decompress();
