@@ -10,10 +10,11 @@ namespace ImageTransferTest
     class FurieByte
     {
         public byte[,] raw;
-        public sbyte[,] cos;
-        public sbyte[,] sin;
+        public float[,] cos;
+        public float[,] sin;
         int size;
-        float[] coses = new float[256];
+        float[] coses;
+        float[] sines;
 
         float[,] loc_cos;
         COMPLEX[,] loc_comp;
@@ -21,8 +22,8 @@ namespace ImageTransferTest
         {
             this.size = size;
             raw = new byte[size, size];
-            cos = new sbyte[size, size];
-            sin = new sbyte[size, size];
+            cos = new float[size, size];
+            sin = new float[size, size];
             loc_cos = new float[size, size];
             loc_comp = new COMPLEX[size, size];
 
@@ -34,9 +35,13 @@ namespace ImageTransferTest
                 }
             }
 
+            coses = new float[size];
+            sines = new float[size];
+
             for (int i = 0; i < 256; i++)
             {
-                coses[i] = (float)Math.Cos(i);
+                coses[i] = (float)Math.Cos(i*2*Math.PI / size);
+                sines[i] = (float)Math.Cos(i * 2 * Math.PI / size);
             }
         }
         
@@ -56,8 +61,8 @@ namespace ImageTransferTest
             {
                 for (int y = 0; y < size; y++)
                 {
-                    cos[x, y] = (sbyte)(loc_comp[x, y].real / 2);
-                    sin[x, y] = (sbyte)(loc_comp[x, y].imag / 2);
+                    cos[x, y] = (float)(loc_comp[x, y].real);
+                    sin[x, y] = (float)(loc_comp[x, y].imag);
                 }
             }
         }
@@ -68,8 +73,8 @@ namespace ImageTransferTest
             {
                 for (int y = 0; y < size; y++)
                 {
-                    loc_comp[x, y].real = cos[x, y] * 2;
-                    loc_comp[x, y].imag = sin[x,y] * 2;
+                    loc_comp[x, y].real = cos[x, y];
+                    loc_comp[x, y].imag = sin[x,y];
                 }
             }
 

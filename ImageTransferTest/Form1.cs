@@ -21,7 +21,7 @@ namespace ImageTransferTest
     {
         ScreenCaptureStream screenCapture;
         DateTime lastFrame = DateTime.Now;
-        FCompress compress = new FCompress(16);
+        FCompress compress = new FCompress(16,8);
         bool save = false;
         public Form1()
         {

@@ -13,11 +13,13 @@ namespace ImageTransferTest
     class FCompress
     {
          int size;
+        int cSize;
         FurieByte furieByte;
         BinaryFormatter formatter = new BinaryFormatter();
-        public FCompress(int block_size = 8)
+        public FCompress(int block_size = 8, int cSize = 4)
         {
             size = block_size;
+            this.cSize = cSize;
             furieByte = new FurieByte(size);
         }
 
@@ -48,16 +50,16 @@ namespace ImageTransferTest
                             }
                         }
                         furieByte.Compress();
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.cos[x, y]);
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.sin[x, y]);
                             }
@@ -73,16 +75,16 @@ namespace ImageTransferTest
                             }
                         }
                         furieByte.Compress();
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.cos[x, y]);
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.sin[x, y]);
                             }
@@ -98,16 +100,16 @@ namespace ImageTransferTest
                             }
                         }
                         furieByte.Compress();
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.cos[x, y]);
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
                                 wr.Write(furieByte.sin[x, y]);
                             }
@@ -141,18 +143,18 @@ namespace ImageTransferTest
                     for (int x0 = 0; x0 < width; x0 += size)
                     {
                         #region Расшифровка синего канала
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_cos[x, y] = reader.ReadSByte();
+                                loc_cos[x, y] = reader.ReadSingle();
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_sin[x, y] = reader.ReadSByte();
+                                loc_sin[x, y] = reader.ReadSingle();
                             }
                         }
                         furieByte.Decompress();
@@ -167,18 +169,18 @@ namespace ImageTransferTest
                         #endregion
 
                         #region Расшифровка зеленого канала
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_cos[x, y] = reader.ReadSByte();
+                                loc_cos[x, y] = reader.ReadSingle();
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_sin[x, y] = reader.ReadSByte();
+                                loc_sin[x, y] = reader.ReadSingle();
                             }
                         }
                         furieByte.Decompress();
@@ -193,18 +195,18 @@ namespace ImageTransferTest
                         #endregion
 
                         #region Расшифровка красного канала
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_cos[x, y] = reader.ReadSByte();
+                                loc_cos[x, y] = reader.ReadSingle();
                             }
                         }
-                        for (int y = 0; y < size; y++)
+                        for (int y = 0; y < cSize; y++)
                         {
-                            for (int x = 0; x < size; x++)
+                            for (int x = 0; x < cSize; x++)
                             {
-                                loc_sin[x, y] = reader.ReadSByte();
+                                loc_sin[x, y] = reader.ReadSingle();
                             }
                         }
                         furieByte.Decompress();
