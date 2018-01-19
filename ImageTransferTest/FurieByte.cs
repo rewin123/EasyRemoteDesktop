@@ -13,11 +13,11 @@ namespace ImageTransferTest
         public float[,] cos;
         public float[,] sin;
         int size;
-        float[] coses;
-        float[] sines;
+        float[,,,] coses;
+        float[,,,] sines;
 
         float[,] loc_cos;
-        COMPLEX[,] loc_comp;
+        float[,] loc_sin;
         public FurieByte(int size)
         {
             this.size = size;
@@ -25,65 +25,76 @@ namespace ImageTransferTest
             cos = new float[size, size];
             sin = new float[size, size];
             loc_cos = new float[size, size];
-            loc_comp = new COMPLEX[size, size];
+            loc_sin = new float[size, size];
 
-            for (int x = 0; x < size; x++)
+            coses = new float[size, size, size, size];
+            sines = new float[size, size, size, size];
+
+            for (int x_w = 0; x_w < size; x_w++)
             {
-                for (int y = 0; y < size; y++)
+                for (int y_w = 0; y_w < size; y_w++)
                 {
-                    loc_comp[x, y] = new COMPLEX();
+                    for (int x = 0; x < size; x++)
+                    {
+                        for (int y = 0; y < size; y++)
+                        {
+                            coses[x_w, y_w, x, y] = (float)Math.Cos((x_w * x + y_w * y) * 2 * Math.PI / size);
+                            sines[x_w, y_w, x, y] = (float)Math.Sin((x_w * x + y_w * y) * 2 * Math.PI / size);
+                        }
+                    }
+
                 }
-            }
-
-            coses = new float[size];
-            sines = new float[size];
-
-            for (int i = 0; i < 256; i++)
-            {
-                coses[i] = (float)Math.Cos(i*2*Math.PI / size);
-                sines[i] = (float)Math.Cos(i * 2 * Math.PI / size);
             }
         }
         
         public void Compress()
         {
-            for(int x = 0;x < size; x++)
+            for(int x_w = 0;x_w < size;x_w++)
             {
-                for(int y = 0;y < size;y++)
+                for (int y_w = 0; y_w < size; y_w++)
                 {
-                    loc_comp[x, y].real = raw[x, y];
-                    loc_comp[x, y].imag = 0;
-                }
-            }
+                    float val = 0;
+                    #region Вычисляем косинус
+                    for(int x = 0;x < size;x++)
+                    {
+                        for(int y = 0;y < size;y++)
+                        {
+                            val += coses[x_w, y_w, x, y] * raw[x, y];
+                        }
+                    }
+                    cos[x_w, y_w] = val / size / size;
+                    #endregion
 
-            loc_comp = FFT.FFT2D(loc_comp, size, size, 1);
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {
-                    cos[x, y] = (float)(loc_comp[x, y].real);
-                    sin[x, y] = (float)(loc_comp[x, y].imag);
+                    val = 0;
+                    #region Вычисляем синус
+                    for (int x = 0; x < size; x++)
+                    {
+                        for (int y = 0; y < size; y++)
+                        {
+                            val += sines[x_w, y_w, x, y] * raw[x, y];
+                        }
+                    }
+                    sin[x_w, y_w] = val / size / size;
+                    #endregion
                 }
             }
         }
 
         public void Decompress()
         {
-            for (int x = 0; x < size; x++)
+            for(int x = 0;x < size;x++)
             {
                 for (int y = 0; y < size; y++)
                 {
-                    loc_comp[x, y].real = cos[x, y];
-                    loc_comp[x, y].imag = sin[x,y];
-                }
-            }
-
-            loc_comp = FFT.FFT2D(loc_comp, size, size, -1);
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {
-                    raw[x, y] = (byte)loc_comp[x, y].real;
+                    float val = 0;
+                    for (int x_w = 0; x_w < size; x_w++)
+                    {
+                        for (int y_w = 0; y_w < size; y_w++)
+                        {
+                            val += cos[x_w, y_w] * coses[x_w, y_w, x, y] + sin[x_w,y_w] * sines[x_w,y_w,x,y];
+                        }
+                    }
+                    raw[x, y] = (byte)val;
                 }
             }
         }
